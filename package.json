@@ -1,0 +1,25 @@
+{
+  "name": "slugline",
+  "version": "0.1.0",
+  "description": "Turn titles into clean URL slugs.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "bin": { "slugline": "src/cli.js" },
+  "files": ["src"],
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "node --test \"test/*.test.js\""
+  },
+  "license": "MIT",
+  "author": "Muhammad Zuhaib Zahid",
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint": "10.15.0",
+    "globals": "17.14.0"
+  }
+}
