@@ -1,6 +1,7 @@
-# Checks every push and pull request: lint, unit tests on three Node.js versions,
-# then pack the package, run the smoke tests on the packed file and write checksums.
-# The release workflow calls this same file, so a release only happens when every check passes.
+# Checks every push and pull request: lint, then unit tests on three Node.js versions on Linux, Windows
+# and macOS. The build runs on Linux: it builds the package, runs the smoke tests on the built packed file
+# and writes checksums. The release workflow calls this same file, so a release only happens when
+# every check passes.
 name: CI
 
 on:
@@ -39,12 +40,13 @@ jobs:
       - run: npm run lint
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         node-version: [22, 24, 26]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
