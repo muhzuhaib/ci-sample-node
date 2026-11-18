@@ -81,6 +81,21 @@ jobs:
           echo '{"name":"smoke","private":true,"type":"module"}' > package.json
           npm install --no-audit --no-fund "$GITHUB_WORKSPACE"/dist/*.tgz
           node --test smoke.test.js
+      - name: Install the package for the SBOM scan
+        # No install scripts run, and this job can only read.
+        run: |
+          mkdir /tmp/sbom-env
+          cd /tmp/sbom-env
+          echo '{"name":"sbom-env","private":true}' > package.json
+          npm install --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE"/dist/*.tgz
+      - name: Create the SBOM (SPDX)
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: /tmp/sbom-env
+          format: spdx-json
+          output-file: dist/sbom.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
       - name: Write checksums
         working-directory: dist
         run: |
