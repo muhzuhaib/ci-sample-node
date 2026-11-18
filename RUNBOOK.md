@@ -9,7 +9,7 @@ repository.
 
 | Workflow | Starts on | Jobs |
 | --- | --- | --- |
-| `.github/workflows/ci.yml` | every push to `main`, every pull request | `lint` (ESLint), `test` (node --test on Node.js 22 and 24), `build` (npm pack, 5 smoke tests on the packed file in a clean folder, SHA256SUMS, run artifact kept 14 days) |
+| `.github/workflows/ci.yml` | every push to `main`, every pull request | `lint` (ESLint), `test` (node --test on Node.js 22, 24 and 26), `build` (npm pack, 5 smoke tests on the packed file in a clean folder, SHA256SUMS, run artifact kept 14 days) |
 | `.github/workflows/release.yml` | a tag starting with `v`, or by hand with a tag | `checks` (all of `ci.yml`), then `release` |
 
 The `release` job has `needs: checks`. If any lint, test or smoke test fails,
@@ -36,8 +36,8 @@ Caching: `actions/setup-node` caches the npm download folder, keyed on `package-
 3. Tag and push:
 
 ```
-git tag -a v0.2.0 -m "slugline 0.2.0"
-git push origin v0.2.0
+git tag -a v0.3.0 -m "slugline 0.3.0"
+git push origin v0.3.0
 ```
 
 The release page then holds the packed `.tgz`, `SHA256SUMS` and `sbom.spdx.json`.
@@ -47,19 +47,19 @@ The release page then holds the packed `.tgz`, `SHA256SUMS` and `sbom.spdx.json`
 1. Open the run: `gh run list --limit 5`, then `gh run view <id> --log-failed`.
 2. Fix the cause on a branch and open a pull request; CI runs on it.
 3. If a version tag was already pushed, nothing was published. Push a new
-   tag (for example `v0.2.1`) once the fix is on `main`.
+   tag (for example `v0.3.1`) once the fix is on `main`.
 
-Proof this repository blocks a release on a failing test: tag `v0.2.0-rc.1`
-on branch `drill/red-test`. Its release run failed in `test` and skipped
+Proof this repository blocks a release on a failing test: tag `v0.3.0-rc.1`
+on branch `drill/red-test-3`. Its release run failed in `test` and skipped
 `build` and `release`, and no release exists for that tag.
 
 ## 4. Check a release
 
 ```
-gh release download v0.2.0 --repo muhzuhaib/ci-sample-node
+gh release download v0.3.0 --repo muhzuhaib/ci-sample-node
 sha256sum -c SHA256SUMS
-gh attestation verify slugline-0.2.0.tgz --repo muhzuhaib/ci-sample-node
-gh attestation verify slugline-0.2.0.tgz --repo muhzuhaib/ci-sample-node --predicate-type https://spdx.dev/Document/v2.3
+gh attestation verify slugline-0.3.0.tgz --repo muhzuhaib/ci-sample-node
+gh attestation verify slugline-0.3.0.tgz --repo muhzuhaib/ci-sample-node --predicate-type https://spdx.dev/Document/v2.3
 ```
 
 `sha256sum -c` shows `OK` for each file. Each `gh attestation verify` ends
@@ -75,12 +75,12 @@ Use this when a release file is lost, damaged or replaced by mistake.
 2. Rebuild that release from its tag:
 
 ```
-gh workflow run release.yml -f tag=v0.2.0
+gh workflow run release.yml -f tag=v0.3.0
 gh run watch
 ```
 
 3. The run checks out the tag, runs every check again, builds, signs and
-   replaces the files on the existing release (`Release v0.2.0 exists:
+   replaces the files on the existing release (`Release v0.3.0 exists:
    replacing its files (recovery)` in the log).
 4. Check it again with section 4. The rebuilt files have new checksums and
    new signatures, made by the release workflow on `main`.
@@ -94,8 +94,7 @@ gh run watch
   the `matrix` in `ci.yml` and drop the oldest one.
 - Private repositories: the checks, SBOM, checksums and releases work the
   same, and the two signing steps are skipped there (they run only on public
-  repositories). Signed build provenance on a private repository needs
-  GitHub Enterprise Cloud. Run time in
+  repositories). The kit signs releases on public repositories only. Run time in
   private repositories counts against the monthly minutes of your GitHub plan.
 - To stop a pull request from being merged while CI is red, turn on a branch
   rule for `main` in Settings and pick the `lint`, `test` and `build` checks
